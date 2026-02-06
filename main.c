@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 05:56:59 by alex              #+#    #+#             */
-/*   Updated: 2025/04/03 13:10:53 by alex             ###   ########.fr       */
+/*   Updated: 2026/02/06 06:44:49 by alejandro        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ int	main(int argz, char **argv)
 		return (1);
 	if (!setup_mlx_enviroment(&mlx, &img_data))
 		return (1);
-	render_set(&mlx, &img_data);
 	mlx_loop(mlx.mlx_var);
 	return (0);
 }

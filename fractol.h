@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fractol.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 06:03:56 by alex              #+#    #+#             */
-/*   Updated: 2025/04/03 13:51:00 by alex             ###   ########.fr       */
+/*   Updated: 2025/12/27 11:18:16 by alejandro        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@
 # include "include/minilibx-linux/mlx_int.h"
 # include "include/libft/libft.h"
 
-# define WIDTH 400
-# define HEIGHT 400
+# define WIDTH 1280
+# define HEIGHT 720
 
 # define MAND_MAX_X 2
 # define MAND_MIN_X -2
@@ -93,8 +93,7 @@ char								mand_jul_coords_necesary_conditions(
 										double real, double imaginary);
 
 // RENDER
-void								render_set(t_mlx_enviroment *mlx,
-										t_image_data *image);
+int								render_set(t_mlx_enviroment *mlx);
 void								scale_xy_to_image_coords(
 										t_complex_factors *z, int x, int y);
 void								apply_zoom_and_moves(t_complex_factors *z,

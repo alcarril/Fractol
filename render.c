@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   render.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 01:07:47 by alex              #+#    #+#             */
-/*   Updated: 2025/04/03 04:51:48 by alex             ###   ########.fr       */
+/*   Updated: 2026/02/06 06:45:53 by alejandro        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void	buffering_pixel(int x, int y, t_image_data *img, int color)
 	*(unsigned int *)(img->bit_map_address + offset) = color;
 }
 
-void	render_set(t_mlx_enviroment *mlx, t_image_data *image)
+int	render_set(t_mlx_enviroment *mlx)
 {
 	t_complex_factors	z;
 	int					pixel_color;
@@ -55,10 +55,12 @@ void	render_set(t_mlx_enviroment *mlx, t_image_data *image)
 		while (++y < WIDTH)
 		{
 			scale_xy_to_image_coords(&z, x, y);
-			apply_zoom_and_moves(&z, image);
-			pixel_color = image->set_def(image, &z);
-			buffering_pixel(x, y, image, pixel_color);
+			apply_zoom_and_moves(&z, mlx->img_data);
+			pixel_color = mlx->img_data->set_def(mlx->img_data, &z);
+			buffering_pixel(x, y, mlx->img_data, pixel_color);
 		}
 	}
-	mlx_put_image_to_window(mlx->mlx_var, mlx->window, image->img_var, 0, 0);
+	mlx_put_image_to_window(mlx->mlx_var, mlx->window,
+		mlx->img_data->img_var, 0, 0);
+	return (0);
 }

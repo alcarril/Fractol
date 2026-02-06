@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   create_cgi_env.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/31 01:09:46 by alex              #+#    #+#             */
-/*   Updated: 2025/04/03 04:30:23 by alex             ###   ########.fr       */
+/*   Updated: 2025/12/27 11:12:25 by alejandro        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,4 +90,5 @@ void	create_hooks(t_mlx_enviroment *mlx)
 		manage_mouse, mlx);
 	mlx_hook(mlx->window, DestroyNotify, StructureNotifyMask,
 		close_handler, mlx);
+	mlx_loop_hook(mlx->mlx_var, render_set, mlx);
 }

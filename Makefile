@@ -3,16 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alex <alex@student.42.fr>                  +#+  +:+       +#+         #
+#    By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 05:57:11 by alex              #+#    #+#              #
-#    Updated: 2025/04/03 13:49:46 by alex             ###   ########.fr        #
+#    Updated: 2025/12/27 11:14:58 by alejandro        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = fractol
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -O3
 LINK_FLAGS = -L$(INCLUDE_FILE)/libft -lft -L$(INCLUDE_FILE)/minilibx-linux -lmlx_Linux \
 			-lXext -lX11 -lm -lz
 	
