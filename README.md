@@ -22,12 +22,12 @@ fract-ol is a real-time fractal explorer that renders **Mandelbrot** and **Julia
 
 ## 🖥️ Demo
 
-<table>
+<table style="width: 100%;">
   <tr>
-    <td><img src="docs/img_fractals/mandeldemo.png" alt="Mandelbrot" width="400" /></td>
+    <td style="width: 100%;"><img src="docs/img_fractals/mandeldemo.png" alt="Mandelbrot" style="width: 100%;" /></td>
   </tr>
   <tr>
-    <td><img src="docs/img_fractals/juliatornado3.png" alt="Julia" width="400" /></td>
+    <td style="width: 100%;"><img src="docs/img_fractals/juliatornado3.png" alt="Julia" style="width: 100%;" /></td>
   </tr>
 </table>
 
