@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fractol.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+        */
+/*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 06:03:56 by alex              #+#    #+#             */
-/*   Updated: 2025/12/27 11:18:16 by alejandro        ###   ########.fr       */
+/*   Updated: 2026/02/08 06:15:19 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include "include/minilibx-linux/mlx_int.h"
 # include "include/libft/libft.h"
 
-# define WIDTH 1280
+# define WIDTH 720
 # define HEIGHT 720
 
 # define MAND_MAX_X 2
