@@ -54,19 +54,23 @@ fract-ol is a real-time fractal explorer that renders **Mandelbrot** and **Julia
 
 ```
 Fractol/
-├── include/             # Third-party libraries (libft, minilibx)
+├── libs/                # Libraries (libft propia, minilibx API)
 ├── docs/                # Documentation and images
-├── color_treatment.c    # Color palettes and iteration coloring
-├── create_cgi_env.c     # Fractal selection and MLX setup
-├── events.c             # Keyboard and mouse handlers
-├── fractol.h            # Main structs and prototypes
-├── main.c               # Entry point and argument parsing
-├── math_utils.c         # Math helpers
-├── render.c             # Pixel rendering and iteration loops
-├── set_definition.c     # Mandelbrot/Julia definitions
-├── utils.c              # Utilities and parsing
-└── Makefile             # Build rules
+├── src/                 # Project sources
+│   ├── fractol.h         # Main structs, constants, prototypes
+│   ├── main.c            # Entry point and argument parsing
+│   ├── create_cgi_env.c  # Fractal selection and MLX setup
+│   ├── events.c          # Keyboard and mouse handlers
+│   ├── render.c          # Pixel rendering and iteration loops
+│   ├── set_definition.c  # Mandelbrot/Julia definitions
+│   ├── color_treatment.c # Color palettes and iteration coloring
+│   ├── math_utils.c      # Math helpers
+│   └── utils.c           # Utilities and parsing
+├── Makefile             # Build rules
 ```
+### Project Overview: 
+
+You can view the complete project architecture and ask an AI about the code here: https://deepwiki.com/alcarril/Fractol
 
 ## 📋 Requirements
 
@@ -145,6 +149,73 @@ Example:
 
 ---
 
+#  MLX and X11 integration
+
+
+## 🌐 What is X11 (client-server model)
+
+**X11** is a **client-server graphics system**. The **X server** owns the display, input devices, and the window tree. Applications are **X clients** that request windows, draw into buffers, and receive input events. In Linux/UNIX, the **X11 server** acts as a **graphics sub-layer** that manages communication between graphics hardware, the OS, and client processes, providing **window creation**, **input event handling** (keyboard and mouse), and **basic screen rendering**.
+
+## ⚡ What is MiniLibX
+
+**MiniLibX** is a **graphics API** built on top of **Xlib**, the **client-side library** used by X11 clients to talk to the X server. In this context, our program is an **X11 client**, and **MiniLibX** abstracts the low-level Xlib API so we can manipulate **windows**, **image buffers**, and **events** without dealing directly with Xlib complexity.
+
+![X11 pipeline diagram](docs/img_mlx/X11_pipelinecomplete.png)
+
+## 🪟 Windows and images
+
+In **X11**, a **window** is a **server-side object**. It is a rectangular region with an **event queue** and a **drawable surface**, but it does not render by itself. The client must draw and redraw when the server reports **exposure events**. X11 offers two main image concepts:
+
+
+
+| Concept | Storage | Characteristics |
+|---------|---------|-----------------|
+| **Image (XImage)** | Client memory | Pixel-accessible, slower for large transfers |
+| **Pixmap** | Server memory | Optimized for fast blits to the window |
+
+
+
+### 💾 Image buffering vs. direct pixel drawing
+
+
+**Direct pixel drawing** sends each pixel request through the **client-server pipeline**, creating significant overhead when rendering thousands of pixels per frame.
+
+**Buffering with an off-screen image** is more efficient: pixels are written to **client-side memory**, then a **single blit operation** transfers the completed frame to the X server. This approach minimizes network round trips and keeps computation local to the client.
+
+
+> Note: **Fractol** renders into an **off-screen image buffer** each frame and then pushes it to the window for **flicker-free output**.
+
+
+### 🖍️ MLX drawing functions
+
+
+| Function | Target | Method |
+|----------|--------|--------|
+| **`mlx_pixel_put`** | Window | Single pixel at a time |
+| **`mlx_put_image_to_window`** | Window | Full image buffer blit |
+
+
+
+
+## 🪝 Events detection (hooks)
+
+Input travels from hardware to drivers, then to the kernel, into the X server (Xorg), and finally to the client through Xlib. MiniLibX exposes this event flow as **hooks**, so we attach callbacks to specific event types:
+
+| Hook | Purpose |
+|------|---------|
+| `mlx_hook` | Registers generic X11 events on a window (press, release, close, expose) |
+| `mlx_key_hook` | Provides simplified keyboard event handlers |
+| `mlx_mouse_hook` | Provides simplified mouse event handlers |
+| `mlx_loop_hook` | Runs a function every frame, ideal for continuous rendering |
+
+
+In practice, input events update the viewport parameters, the render loop redraws the fractal into the image buffer, and `mlx_put_image_to_window` presents the frame.
+
+
+<br>
+
+---
+
 # Fractals
 
 Fractals are geometric shapes built from simple rules repeated at many scales. Their defining principles are **self-similarity** (patterns that look alike when zoomed), **iteration** (repeated mathematical steps), and **sensitivity to initial conditions**, which produces rich detail from compact formulas. Sets like Mandelbrot and Julia come from iterating complex-number functions on the complex plane, classifying each point by whether the sequence stays bounded or escapes.
@@ -152,7 +223,7 @@ Fractals are geometric shapes built from simple rules repeated at many scales. T
 These patterns are not just mathematical curiosities: fractal-like structures appear in nature, such as coastlines, mountain ranges, clouds, river networks, snowflakes, ferns, and even branching in trees and lightning. This project visualizes that same idea of repeating structure and infinite detail through interactive zooming.
 
 
-## How do we calculate fractals?
+## 🧮 How do we calculate fractals?
 
 
 For each pixel on the screen, we convert it to a point on the **complex plane**. We apply an **iterative formula** to that point (for example $z_{n+1} = z_n^2 + c$) and repeat the process a **fixed number of times**. If at any step the value of $|z_n|$ exceeds an **escape radius** (typically $2$), we consider the point **divergent**.
@@ -160,16 +231,16 @@ For each pixel on the screen, we convert it to a point on the **complex plane**.
 The **color** of each pixel is based on **how many iterations it takes to escape**. If it escapes quickly, it is painted with a different color than if it takes longer or doesn't escape within the limit. This is why the **maximum iteration count** affects **detail** and **palette**: with `+` and `-` you can increase or decrease those iterations to see more detail or gain performance.
 
 
-## How do we select the color?
+## 🎨 How do we select the color?
 
 To colorize, you can use a **color palette** and scale it to the number of iterations used to decide whether the point escapes or not. Another option is to apply a **mathematical gradient**, modifying a base color based on the number of operations before escape. In this project, I chose to use the palette approach.
 
-## What about infinite zoom?
+## 🔎 What about infinite zoom?
 
 These sets are described as having **infinite depth** because they are perfectly imperfect: if the perfect path between two points is a straight line, the less perfect one can have infinite detail. That's why you can zoom frame after frame and keep finding new structures. In practice, the only limits are resolution, precision, and your computer's performance.
 
 
-## 🌌 Mandelbrot Set
+## 1️⃣ Mandelbrot Set
 
 The Mandelbrot set is defined by the iteration:
 
@@ -191,7 +262,7 @@ A point $c$ belongs to the set if the sequence does not diverge. Coloring is bas
 </table>
 
 
-## 🧪 Julia Set
+## 2️⃣ Julia Set
 
 The Julia set fixes $c$ and iterates the sequence for each pixel mapped to $z_0$:
 
@@ -205,7 +276,8 @@ If $|z_n|$ grows beyond a chosen escape radius (commonly $2$), the point is cons
 
 Use these values to explore different looks. Replace the image paths with your own captures.
 
-**c = 0.0 + 0.8i**
+<div align="center"><strong>c = 0.0 + 0.8i</strong></div>
+
 ```
 ./fractol Julia 0.0 0.8
 ```
@@ -217,7 +289,8 @@ Use these values to explore different looks. Replace the image paths with your o
   </tr>
 </table>
 
-**c = -0.8 + 0.156i**
+<div align="center"><strong>c = -0.8 + 0.156i</strong></div>
+
 ```
 ./fractol Julia -0.8 0.156
 ```
@@ -231,7 +304,8 @@ Use these values to explore different looks. Replace the image paths with your o
 </table>
 
 
-**c = 0.37 + 0.1i**
+<div align="center"><strong>c = 0.37 + 0.1i</strong></div>
+
 ```
 ./fractol Julia 0.37 0.1
 ```
@@ -242,7 +316,8 @@ Use these values to explore different looks. Replace the image paths with your o
   </tr>
 </table>
 
-**c = 0.355 + 0.355i**
+<div align="center"><strong>c = 0.355 + 0.355i</strong></div>
+
 ```
 ./fractol Julia 0.355 0.355
 ```
@@ -254,10 +329,12 @@ Use these values to explore different looks. Replace the image paths with your o
   </tr>
 </table>
 
-**c = -0.54 + 0.54i**
+<div align="center"><strong>c = -0.54 + 0.54i</strong></div>
+
 ```
 ./fractol Julia -0.54 0.54
 ```
+
 <table>
   <tr>
     <td><img src="docs/img_fractals/julianose.png" alt="Julia Nose" width="400" /></td>
@@ -265,7 +342,8 @@ Use these values to explore different looks. Replace the image paths with your o
   </tr>
 </table>
 
-**c = -0.4 - 0.59i**
+<div align="center"><strong>c = -0.4 - 0.59i</strong></div>
+
 ```
 ./fractol Julia -0.4 -0.59
 ```
@@ -277,7 +355,8 @@ Use these values to explore different looks. Replace the image paths with your o
   </tr>
 </table>
 
-**c = 0.34 - 0.05i**
+<div align="center"><strong>c = 0.34 - 0.05i</strong></div>
+
 ```
 ./fractol Julia 0.34 -0.05
 ```
@@ -329,65 +408,6 @@ For **continuous sets** like Mandelbrot and Julia, we iterate **every pixel** an
 > **Note:** 📝 More: [My article on Notion](https://broken-snowdrop-f03.notion.site/Renderizado-de-imegenes-y-escalas-2fbb80eb3d8880d69491dbec05c804ae).
 
 
-## 🧰 MLX and X11 integration
-
-
-### 🌐 What is X11 (client-server model)
-
-**X11** is a **client-server graphics system**. The **X server** owns the display, input devices, and the window tree. Applications are **X clients** that request windows, draw into buffers, and receive input events. In Linux/UNIX, the **X11 server** acts as a **graphics sub-layer** that manages communication between graphics hardware, the OS, and client processes, providing **window creation**, **input event handling** (keyboard and mouse), and **basic screen rendering**.
-
-### ⚡ What is MiniLibX
-
-**MiniLibX** is a **graphics API** built on top of **Xlib**, the **client-side library** used by X11 clients to talk to the X server. In this context, our program is an **X11 client**, and **MiniLibX** abstracts the low-level Xlib API so we can manipulate **windows**, **image buffers**, and **events** without dealing directly with Xlib complexity.
-
-![X11 pipeline diagram](docs/img_mlx/X11_pipelinecomplete.png)
-
-### 🪟 Windows and images
-
-In **X11**, a **window** is a **server-side object**. It is a rectangular region with an **event queue** and a **drawable surface**, but it does not render by itself. The client must draw and redraw when the server reports **exposure events**. X11 offers two main image concepts:
-
-
-
-| Concept | Storage | Characteristics |
-|---------|---------|-----------------|
-| **Image (XImage)** | Client memory | Pixel-accessible, slower for large transfers |
-| **Pixmap** | Server memory | Optimized for fast blits to the window |
-
-
-> Note: **Fractol** renders into an **off-screen image buffer** each frame and then pushes it to the window for **flicker-free output**.
-
-#### ⚡ MLX drawing functions and performance
-
-
-| Function | Target | Method |
-|----------|--------|--------|
-| **`mlx_pixel_put`** | Window | Single pixel at a time |
-| **`mlx_put_image_to_window`** | Window | Full image buffer blit |
-
-
-#### ❓ Why is `mlx_pixel_put` slower than buffering?
-
-**`mlx_pixel_put`** is **slower** because every pixel request travels through the **full client-server stack** (client → Xlib → X server → kernel/driver → GPU). When you draw thousands of pixels per frame, that overhead dominates.
-
-**Buffering** with an **MLX image** is **faster** because you write pixels in **client memory** (image buffer), then send a **single blit** to the X server with **`mlx_put_image_to_window`**. This reduces the number of round trips and keeps most of the work on the **client side**.
-
-
-### 🎯 Events detection (hooks)
-
-Input travels from hardware to drivers, then to the kernel, into the X server (Xorg), and finally to the client through Xlib. MiniLibX exposes this event flow as **hooks**, so we attach callbacks to specific event types:
-
-| Hook | Purpose |
-|------|---------|
-| `mlx_hook` | Registers generic X11 events on a window (press, release, close, expose) |
-| `mlx_key_hook` | Provides simplified keyboard event handlers |
-| `mlx_mouse_hook` | Provides simplified mouse event handlers |
-| `mlx_loop_hook` | Runs a function every frame, ideal for continuous rendering |
-
-
-In practice, input events update the viewport parameters, the render loop redraws the fractal into the image buffer, and `mlx_put_image_to_window` presents the frame.
-
-
-
 <br>
 
 ---
@@ -396,12 +416,30 @@ In practice, input events update the viewport parameters, the render loop redraw
 
 ### Mathematics
 
+#### Complex numbers
+
+- https://www.youtube.com/watch?v=LqyBrrgmIro&ab_channel=Derivando
+- https://www.youtube.com/watch?v=hWbwBGPLvk4
+
+#### Fractal 
+
+- https://www.youtube.com/watch?v=Wea_1L-C9Xo
+- https://www.youtube.com/watch?v=Tt-jjxjTHTQ
+- https://www.youtube.com/watch?v=EOvLhZPevm0&t=16s
+- https://www.youtube.com/watch?v=gB9n2gHsHN4
+- https://complex-analysis.com/contenido/conjunto_de_mandelbrot.html
+- https://www.geogebra.org/m/shfghkn7
 - https://en.wikipedia.org/wiki/Mandelbrot_set
 - https://en.wikipedia.org/wiki/Julia_set
 
-### MLX and X11
+#### Math library
+
+- https://platzi.com/blog/todas-las-funciones-de-la-biblioteca-mathh-en-c/
+
+### Mlx and X11
 
 - https://github.com/42Paris/minilibx-linux
+- https://harm-smits.github.io/42docs/libs/minilibx
 
 <br>
 

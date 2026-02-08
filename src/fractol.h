@@ -6,16 +6,16 @@
 /*   By: alex <alex@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/04 06:03:56 by alex              #+#    #+#             */
-/*   Updated: 2026/02/08 06:15:19 by alex             ###   ########.fr       */
+/*   Updated: 2026/02/08 09:28:27 by alex             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FRACTOL_H
 # define FRACTOL_H
 
-# include "include/minilibx-linux/mlx.h"
-# include "include/minilibx-linux/mlx_int.h"
-# include "include/libft/libft.h"
+# include "../libs/minilibx-linux/mlx.h"
+# include "../libs/minilibx-linux/mlx_int.h"
+# include "../libs/libft/libft.h"
 
 # define WIDTH 720
 # define HEIGHT 720

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alejandro <alejandro@student.42.fr>        +#+  +:+       +#+         #
+#    By: alex <alex@student.42.fr>                  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/03/04 05:57:11 by alex              #+#    #+#              #
-#    Updated: 2025/12/27 11:14:58 by alejandro        ###   ########.fr        #
+#    Updated: 2026/02/08 09:28:08 by alex             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,10 +17,13 @@ LINK_FLAGS = -L$(INCLUDE_FILE)/libft -lft -L$(INCLUDE_FILE)/minilibx-linux -lmlx
 			-lXext -lX11 -lm -lz
 	
 FILE_NAME = fractol
-HEADERS = $(SRC_FILE)/fractol.h
-INCLUDE_FILE = include
-SRC = main.c math_utils.c utils.c set_definition.c render.c \
-		create_cgi_env.c events.c color_treatment.c
+SRC_DIR = src
+HEADERS = fractol.h
+INCLUDE_FILE = libs
+SRC = $(SRC_DIR)/main.c $(SRC_DIR)/math_utils.c $(SRC_DIR)/utils.c \
+		$(SRC_DIR)/set_definition.c $(SRC_DIR)/render.c \
+		$(SRC_DIR)/create_cgi_env.c $(SRC_DIR)/events.c \
+		$(SRC_DIR)/color_treatment.c
 
 LIBFT = libft.a
 MINI_LIBX = libmlx.a
