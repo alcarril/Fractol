@@ -45,6 +45,7 @@ fract-ol is a real-time fractal explorer that renders **Mandelbrot** and **Julia
 - 🌈 **Custom color treatment** to highlight detail
 
 
+<br>
 
 ---
 # Getting Started
@@ -119,6 +120,8 @@ make
 | Color | `+` / `-` | Increase/decrease color iteration count per pixel |
 | Exit | `ESC` | Quit program |
 
+> Note: If the window is blank, try lowering the iteration count.
+
 
 ## 🧩 Julia parameters
 
@@ -134,7 +137,7 @@ Example:
 ./fractol Julia -0.8 0.156
 ```
 
-For stable and detailed Julia sets, keep parameters roughly within $[-2, 2]$ for both real and imaginary parts.
+> Note: For stable and detailed Julia sets, keep parameters roughly within $[-2, 2]$ for both real and imaginary parts.
 
 
 <br>
@@ -150,9 +153,11 @@ These patterns are not just mathematical curiosities: fractal-like structures ap
 
 ## How do we calculate fractals?
 
-For each pixel on the screen, we convert it to a point on the complex plane. We apply an iterative formula to that point (for example $z_{n+1} = z_n^2 + c$) and repeat the process a fixed number of times. If at any step the value of $|z_n|$ exceeds an escape radius (typically $2$), we consider the point divergent.
 
-The color of each pixel is based on how many iterations it takes to escape. If it escapes quickly, it is painted with a different color than if it takes longer or doesn't escape within the limit. This is why the maximum iteration count affects detail and palette: with `+` and `-` you can increase or decrease those iterations to see more detail or gain performance.
+For each pixel on the screen, we convert it to a point on the **complex plane**. We apply an **iterative formula** to that point (for example $z_{n+1} = z_n^2 + c$) and repeat the process a **fixed number of times**. If at any step the value of $|z_n|$ exceeds an **escape radius** (typically $2$), we consider the point **divergent**.
+
+The **color** of each pixel is based on **how many iterations it takes to escape**. If it escapes quickly, it is painted with a different color than if it takes longer or doesn't escape within the limit. This is why the **maximum iteration count** affects **detail** and **palette**: with `+` and `-` you can increase or decrease those iterations to see more detail or gain performance.
+
 
 ## How do we select the color?
 
@@ -172,6 +177,18 @@ $$
 $$
 
 A point $c$ belongs to the set if the sequence does not diverge. Coloring is based on the number of iterations before escape.
+
+<table>
+  <tr>
+    <td><img src="docs/img_fractals/mandeldemo.png" alt="Mandelbrot Demo" width="400" /></td>
+    <td><img src="docs/img_fractals/mandeldemo2.png" alt="Mandelbrot 3" width="400" /></td>
+  </tr>
+  <tr>
+    <td><img src="docs/img_fractals/mandeldemo4.png" alt="Mandelbrot Demo 4" width="400" /></td>
+    <td><img src="docs/img_fractals/mandel.png" alt="Mandelbrot" width="400" /></td>
+  </tr>
+</table>
+
 
 ## 🧪 Julia Set
 
@@ -308,7 +325,6 @@ In **X11**, a **window** is a **server-side object**. It is a rectangular region
 
 #### ⚡ MLX drawing functions and performance
 
-**MiniLibX** offers two common ways to draw:
 
 | Function | Target | Method |
 |----------|--------|--------|
@@ -373,8 +389,34 @@ For **continuous sets** like Mandelbrot and Julia, we iterate **every pixel** an
 
 <img src="docs/img_mlx/ESCALAS.png" alt="Scaling diagram" style="width: 100%; max-width: 100%;" />
 
-# Notes
+<br>
+
+---
+# Resources
+
+### Mathematics
+
+- https://en.wikipedia.org/wiki/Mandelbrot_set
+- https://en.wikipedia.org/wiki/Julia_set
+
+### MLX and X11
+
+- https://github.com/42Paris/minilibx-linux
+
+<br>
+
+---
+
+# Author
+
+👨‍💻 **Alejandro Carrillo (alcarril)**  
+[![GitHub](https://img.shields.io/badge/GitHub-alcarril-333?style=flat-square&logo=github)](https://github.com/alcarril)
 
 
-- If you get a blank window, reduce zoom or increase iteration limits.
-- Julia parameters outside $[-2, 2]$ often diverge quickly and may produce sparse images.
+---
+
+## License
+
+This project does not include a license file in the repository.
+
+
