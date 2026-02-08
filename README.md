@@ -36,16 +36,15 @@ fract-ol is a real-time fractal explorer that renders **Mandelbrot** and **Julia
 
 ### Input and Interaction
 - 🖱️ **Mouse zoom** centered at cursor position
+- 🎨 **Iteration control** with `+` and `-` keys for dynamic detail adjustment
 - 🎯 **Keyboard movement** for precise navigation
 - 🎛️ **Julia parameter control** via CLI arguments
-- 🧭 **Viewport reset** to default state
 
 ### Color and Visuals
 - 🎨 **Gradient-based palette** based on escape iterations
 - 🌈 **Custom color treatment** to highlight detail
 
 
-<br><br>
 
 ---
 # Getting Started
@@ -115,10 +114,9 @@ make
 
 | Category | Key | Action |
 |---|---|---|
-| Navigation | `W`, `A`, `S`, `D` | Move viewport |
 | Navigation | Arrow keys | Fine pan adjustment |
 | Zoom | Mouse wheel | Zoom in/out |
-| View | `R` | Reset view |
+| Color | `+` / `-` | Increase/decrease color iteration count per pixel |
 | Exit | `ESC` | Quit program |
 
 
@@ -139,11 +137,31 @@ Example:
 For stable and detailed Julia sets, keep parameters roughly within $[-2, 2]$ for both real and imaginary parts.
 
 
-<br><br>
+<br>
 
 ---
 
 # Fractals
+
+Fractals are geometric shapes built from simple rules repeated at many scales. Their defining principles are **self-similarity** (patterns that look alike when zoomed), **iteration** (repeated mathematical steps), and **sensitivity to initial conditions**, which produces rich detail from compact formulas. Sets like Mandelbrot and Julia come from iterating complex-number functions on the complex plane, classifying each point by whether the sequence stays bounded or escapes.
+
+These patterns are not just mathematical curiosities: fractal-like structures appear in nature, such as coastlines, mountain ranges, clouds, river networks, snowflakes, ferns, and even branching in trees and lightning. This project visualizes that same idea of repeating structure and infinite detail through interactive zooming.
+
+
+## How do we calculate fractals?
+
+For each pixel on the screen, we convert it to a point on the complex plane. We apply an iterative formula to that point (for example $z_{n+1} = z_n^2 + c$) and repeat the process a fixed number of times. If at any step the value of $|z_n|$ exceeds an escape radius (typically $2$), we consider the point divergent.
+
+The color of each pixel is based on how many iterations it takes to escape. If it escapes quickly, it is painted with a different color than if it takes longer or doesn't escape within the limit. This is why the maximum iteration count affects detail and palette: with `+` and `-` you can increase or decrease those iterations to see more detail or gain performance.
+
+## How do we select the color?
+
+To colorize, you can use a **color palette** and scale it to the number of iterations used to decide whether the point escapes or not. Another option is to apply a **mathematical gradient**, modifying a base color based on the number of operations before escape. In this project, I chose to use the palette approach.
+
+## What about infinite zoom?
+
+These sets are described as having **infinite depth** because they are perfectly imperfect: if the perfect path between two points is a straight line, the less perfect one can have infinite detail. That's why you can zoom frame after frame and keep finding new structures. In practice, the only limits are resolution, precision, and your computer's performance.
+
 
 ## 🌌 Mandelbrot Set
 
@@ -268,7 +286,7 @@ Use these values to explore different looks. Replace the image paths with your o
 
 **X11** is a **client-server graphics system**. The **X server** owns the display, input devices, and the window tree. Applications are **X clients** that request windows, draw into buffers, and receive input events. In Linux/UNIX, the **X11 server** acts as a **graphics sub-layer** that manages communication between graphics hardware, the OS, and client processes, providing **window creation**, **input event handling** (keyboard and mouse), and **basic screen rendering**.
 
-### What is MiniLibX
+### ⚡ What is MiniLibX
 
 **MiniLibX** is a **graphics API** built on top of **Xlib**, the **client-side library** used by X11 clients to talk to the X server. In this context, our program is an **X11 client**, and **MiniLibX** abstracts the low-level Xlib API so we can manipulate **windows**, **image buffers**, and **events** without dealing directly with Xlib complexity.
 
@@ -276,21 +294,29 @@ Use these values to explore different looks. Replace the image paths with your o
 
 ### 🪟 Windows and images
 
-In **X11**, a **window** is a **server-side object**. It is a rectangular region with an **event queue** and a **drawable surface**, but it does not render by itself. The client must draw and redraw when the server reports **exposure events**.
+In **X11**, a **window** is a **server-side object**. It is a rectangular region with an **event queue** and a **drawable surface**, but it does not render by itself. The client must draw and redraw when the server reports **exposure events**. X11 offers two main image concepts:
 
-X11 offers two main image concepts:
 
-- **🖼️ Image (XImage)**: lives in **client memory**, pixel-accessible.
-- **📦 Pixmap**: lives in **server memory**, optimized for fast blits to the window.
 
-**Fractol** renders into an **off-screen image buffer** each frame and then pushes it to the window for **flicker-free output**.
+| Concept | Storage | Characteristics |
+|---------|---------|-----------------|
+| **Image (XImage)** | Client memory | Pixel-accessible, slower for large transfers |
+| **Pixmap** | Server memory | Optimized for fast blits to the window |
+
+
+> Note: **Fractol** renders into an **off-screen image buffer** each frame and then pushes it to the window for **flicker-free output**.
 
 #### ⚡ MLX drawing functions and performance
 
 **MiniLibX** offers two common ways to draw:
 
-- **`mlx_pixel_put`**: draws a **single pixel** directly to the window.
-- **`mlx_put_image_to_window`**: blits a **full image buffer** to the window.
+| Function | Target | Method |
+|----------|--------|--------|
+| **`mlx_pixel_put`** | Window | Single pixel at a time |
+| **`mlx_put_image_to_window`** | Window | Full image buffer blit |
+
+
+#### ❓ Why is `mlx_pixel_put` slower than buffering?
 
 **`mlx_pixel_put`** is **slower** because every pixel request travels through the **full client-server stack** (client → Xlib → X server → kernel/driver → GPU). When you draw thousands of pixels per frame, that overhead dominates.
 
@@ -301,9 +327,13 @@ X11 offers two main image concepts:
 
 Input travels from hardware to drivers, then to the kernel, into the X server (Xorg), and finally to the client through Xlib. MiniLibX exposes this event flow as **hooks**, so we attach callbacks to specific event types:
 
-- `mlx_hook` registers generic X11 events on a window (press, release, close, expose).
-- `mlx_key_hook` and `mlx_mouse_hook` provide simplified key and mouse handlers.
-- `mlx_loop_hook` runs a function every frame, ideal for continuous rendering.
+| Hook | Purpose |
+|------|---------|
+| `mlx_hook` | Registers generic X11 events on a window (press, release, close, expose) |
+| `mlx_key_hook` | Provides simplified keyboard event handlers |
+| `mlx_mouse_hook` | Provides simplified mouse event handlers |
+| `mlx_loop_hook` | Runs a function every frame, ideal for continuous rendering |
+
 
 In practice, input events update the viewport parameters, the render loop redraws the fractal into the image buffer, and `mlx_put_image_to_window` presents the frame.
 
@@ -340,8 +370,11 @@ Where $c$ is the **zoom center** and $s$ is the **scale factor**. **Translation*
 For **continuous sets** like Mandelbrot and Julia, we iterate **every pixel** and **map it to a complex point**. This **pixel-to-set approach** avoids holes and aliasing that appear when projecting sparse sets onto discrete screens. It guarantees **full coverage** and **consistent coloring** across the image.
 
 
-![Scaling diagram](docs/img_mlx/ESCALAS.png)
+
+<img src="docs/img_mlx/ESCALAS.png" alt="Scaling diagram" style="width: 100%; max-width: 100%;" />
+
 # Notes
+
 
 - If you get a blank window, reduce zoom or increase iteration limits.
 - Julia parameters outside $[-2, 2]$ often diverge quickly and may produce sparse images.
